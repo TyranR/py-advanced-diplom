@@ -3,7 +3,6 @@ import requests
 import json
 import time
 import datetime
-from BestTinderEver.MongoWorker.dbwriter import read_data as mongoworker
 
 
 def who_is():
@@ -83,9 +82,9 @@ def what_are_user_groups(client_id):
         return usergroups
 
 
-def what_are_user_detail(client_id):
+def what_are_original_user_detail(client_id):
     """
-    Запрашиваем детали по пользователю
+    Запрашиваем детали по искомому пользователю
     """
     params = {
         'access_token': TOKEN,
@@ -150,12 +149,76 @@ def what_are_user_detail(client_id):
     print(f'Будем искать родившихся с {age_finish} до {age_start}')
     try:
         pprint(response_json['response'][0]['interests'])
+        interests = response_json['response'][0]['interests']
     except:
         print('Интересов нет')
+        interests = ""
     try:
         pprint(response_json['response'][0]['relation'])
+        relation = response_json['response'][0]['relation']
     except:
         print('Отношения не указаны')
+        relation = ""
+
+    usergroups = what_are_user_groups(client_id)
+    print(f'\nГруппы будем искать такие : {usergroups}')
+
+    id_user = 'https://vk.com/id'+str(client_id)
+    final_choose = {'gender': gender, 'place': place , 'age_start': age_start, 'age_finish': age_finish, \
+                    'usergroups': usergroups, 'interests': interests, 'relation':relation}
+    return final_choose
+
+
+def what_are_user_detail(client_id):
+    """
+    Запрашиваем детали по пользователю
+    """
+    params = {
+        'access_token': TOKEN,
+        'v': 5.101,
+        'user_id': client_id,
+        'extended': 1,
+        'count': 1000,
+        'fields': 'sex,city,bdate,interests,relation'
+    }
+    response = requests.get(
+        'https://api.vk.com/method/users.get',
+        params
+    )
+    response_json = response.json()
+    pprint(response_json)
+    try:
+        gender = response_json['response'][0]['sex']
+    except:
+        gender = 0
+    try:
+        place = response_json['response'][0]['city']['title']
+    except:
+        place = ""
+    try:
+        age_temp = response_json['response'][0]['bdate']
+        age_temp_2 = age_temp.split('.')
+        age_born = int(age_temp_2[2])
+    except:
+        now = datetime.datetime.now()
+        age_born = now.year
+    try:
+        pprint(response_json['response'][0]['interests'])
+        interests = response_json['response'][0]['interests']
+    except:
+        interests = ""
+    try:
+        pprint(response_json['response'][0]['relation'])
+        relation = response_json['response'][0]['relation']
+    except:
+        relation = ""
+    # usergroups = what_are_user_groups(client_id)
+    usergroups = ""
+    url_user = 'https://vk.com/id'+str(client_id)
+    client_data = {'userid': client_id, 'gender': gender, 'place': place , 'age_born': age_born, \
+                   'usergroups': usergroups, 'interests': interests, 'relation':relation, \
+                   'url': url_user}
+    return client_data
 
 
 def what_are_user_avatars(client_id):
@@ -177,7 +240,7 @@ def what_are_user_avatars(client_id):
         params
     )
     response_json = response.json()
-    pprint(response_json['response']['items'])
+    pprint(response_json)
     top3 = [{'id': 0, 'likes': 0, 'url': ""}, {'id': 0, 'likes': 0, 'url': ""}, {'id': 0, 'likes': 0, 'url': ""}]
     for each in response_json['response']['items']:
         if each['likes']['count'] > top3[0]['likes']:
@@ -205,5 +268,6 @@ def what_are_user_avatars(client_id):
     return top3
 
 
-TOKEN = '54388f42ee9169ad76080cfc55b60af344884ddf36ac1721674a218962da0d979d06b1ed2d25f875fb028'
+TOKEN = '79a2ff5d2be66ee861ae5ca60e5acb1a07611ea901d85204368694a4228ac9468db7bf8699f67fb6b9a30'
+url_for_token = 'https://oauth.vk.com/authorize?client_id=7401636&response_type=token&v=5.103'
 

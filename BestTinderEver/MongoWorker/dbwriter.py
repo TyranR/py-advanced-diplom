@@ -3,26 +3,33 @@ import re
 from pprint import pprint
 from pymongo import MongoClient
 
-client = MongoClient(host='192.168.66.74', port=32017)
+client = MongoClient(host='192.168.66.73', port=32017)
 
-def read_data(csv_file, db):
+# client.drop_database('tinder')
+db = client['tinder']
+
+def write_data(client_data):
     """
-    Загрузить данные в бд из CSV-файла
+    Загрузить данные в бд
     """
-    client.drop_database(db)
-    db = client[db]
-    db_collection = db["artists"]
-    with open(csv_file, encoding='utf8') as csvfile:
-        # прочитать файл с данными и записать в коллекцию
-        reader = csv.DictReader(csvfile, delimiter=',')
-        for row in reader:
-            db_collection.insert_one({
-                'Исполнитель': row["Исполнитель"],
-                'Цена': int(row["Цена"]),
-                'Место': row["Место"],
-                'Дата': row["Дата"]
-            })
-            # print(row["Исполнитель"], row["Цена"], row["Место"], row["Дата"])
-    # pprint(list(db_collection.find()))
-    return "Импортировали данные"
+    db_collection = db["people"]
+    if list(db_collection.find({'userid': client_data['userid']})):
+        pass
+    else:
+        db_collection.insert_one({
+            'userid': client_data['userid'],
+            'gender': client_data['gender'],
+            'place': client_data['place'],
+            'age_born': client_data['age_born'],
+            'usergroups': client_data['usergroups'],
+            'interests': client_data['interests'],
+            'relation': client_data['relation'],
+            'url': client_data['url']
+        })
+        print (f"Импортировали данные {client_data['userid']}")
+    return True
+
+def read_all():
+    db_collection = db["people"]
+    pprint(list(db_collection.find()))
 
