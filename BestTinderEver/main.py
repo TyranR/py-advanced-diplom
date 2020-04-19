@@ -48,7 +48,7 @@ def main():
     top10_with_photo = what_are_the_top_user_avatar(match_people)
     pprint(top10_with_photo)
     print("\nЭтап 5. Записываем полученных пользователей в базу данных.")
-    
+
     # read_all()
     # write_data(client_data) #записываем сразу в базу
     # дубликаты надо пропускать

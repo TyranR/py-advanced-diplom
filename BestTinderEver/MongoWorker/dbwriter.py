@@ -8,6 +8,7 @@ client = MongoClient(host='192.168.66.73', port=32017)
 # client.drop_database('tinder')
 db = client['tinder']
 
+
 def write_data(client_data):
     """
     Загрузить данные в бд
@@ -28,6 +29,21 @@ def write_data(client_data):
         })
         print (f"Импортировали данные {client_data['userid']}")
     return True
+
+
+def search_partner_database(source_data, right_order):
+    """
+    Для поиска по базе
+    :return:
+    """
+    print("Ищем партнера по следующим данным")
+    pprint(source_data)
+    db_collection = db["people"]
+
+
+
+
+
 
 def read_all():
     db_collection = db["people"]

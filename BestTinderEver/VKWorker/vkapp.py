@@ -100,6 +100,7 @@ def what_are_original_user_detail(client_id):
     )
     response_json = response.json()
     pprint(response_json)
+    print('\n Можно просто нажимать ENTER.')
     try:
         if response_json['response'][0]['sex'] == 2:
             answer = input('Ищем женщину? (y/n): ')
@@ -151,21 +152,20 @@ def what_are_original_user_detail(client_id):
         pprint(response_json['response'][0]['interests'])
         interests = response_json['response'][0]['interests']
     except:
-        print('Интересов нет')
-        interests = ""
+        print('Интересов нет. Надо их задать')
+        interests = input('Задай интересы для поиска: ')
     try:
         pprint(response_json['response'][0]['relation'])
         relation = response_json['response'][0]['relation']
     except:
         print('Отношения не указаны')
-        relation = ""
-
+        relation = 0
     usergroups = what_are_user_groups(client_id)
     print(f'\nГруппы будем искать такие : {usergroups}')
-
-    id_user = 'https://vk.com/id'+str(client_id)
     final_choose = {'gender': gender, 'place': place , 'age_start': age_start, 'age_finish': age_finish, \
-                    'usergroups': usergroups, 'interests': interests, 'relation':relation}
+                   'usergroups': usergroups, 'interests': interests, 'relation': relation}
+    # final_choose = [('gender', gender), ('place', place), ('age_start', age_start), ('age_finish', age_finish), \
+    #                 ('usergroups', usergroups), ('interests', interests), ('relation', relation)]
     return final_choose
 
 
@@ -186,7 +186,15 @@ def what_are_user_detail(client_id):
         params
     )
     response_json = response.json()
+    print('\n')
     pprint(response_json)
+    if response_json.get('error') and (response_json['error']['error_msg'] == 'Too many requests per second'):
+        print(f"\nПридётся подождать 2 секунды, из-за ошибки {response_json['error']['error_msg'] }")
+        time.sleep(2)
+        response_json = response.json()
+    elif response_json.get('error') and (response_json['error']['error_msg'] == 'This profile is private' or \
+                                       response_json['error']['error_msg'] == 'User was deleted or banned'):
+        return False
     try:
         gender = response_json['response'][0]['sex']
     except:
@@ -211,14 +219,44 @@ def what_are_user_detail(client_id):
         pprint(response_json['response'][0]['relation'])
         relation = response_json['response'][0]['relation']
     except:
-        relation = ""
-    # usergroups = what_are_user_groups(client_id)
-    usergroups = ""
+        relation = 0
+    usergroups = what_are_user_groups(client_id)
+    #usergroups = ''
     url_user = 'https://vk.com/id'+str(client_id)
     client_data = {'userid': client_id, 'gender': gender, 'place': place , 'age_born': age_born, \
-                   'usergroups': usergroups, 'interests': interests, 'relation':relation, \
+                   'usergroups': usergroups, 'interests': interests, 'relation': relation, \
                    'url': url_user}
+    pprint(client_data)
     return client_data
+
+
+def search_partner_dic(source_data, all_users_profiles):
+    """
+    Для поиска по словарю, вхождения из пользователя
+    :param right_order:
+    :param all_users_profiles:
+    :return:
+    """
+    # pprint(source_data)
+    match_users = {}
+    count = 1
+    for each in all_users_profiles.values():
+        # Для точного поиска - используем полную версию требований
+        # if (each['gender'] == source_data['gender'] and each['place'] == source_data['place'] and \
+        #         each['age_born'] >= source_data['age_start'] and each['age_born'] <= source_data['age_start']):
+        print(".", end="")
+        if each['gender'] == source_data['gender']: # для того чтобы долго не ждать, а только проверить программы
+            count = count + 1
+            match_users.update({each['userid']: each})
+
+            #
+            #
+            # client_data = {'userid': client_id, 'gender': gender, 'place': place, 'age_born': age_born, \
+            #                'usergroups': usergroups, 'interests': interests, 'relation': relation, \
+            #                'url': url_user}
+    # pprint(match_users)
+    print(f"\nСовпадений нашлось: {count}")
+    return match_users
 
 
 def what_are_user_avatars(client_id):
@@ -240,8 +278,10 @@ def what_are_user_avatars(client_id):
         params
     )
     response_json = response.json()
-    pprint(response_json)
+    # pprint(response_json)
     top3 = [{'id': 0, 'likes': 0, 'url': ""}, {'id': 0, 'likes': 0, 'url': ""}, {'id': 0, 'likes': 0, 'url': ""}]
+    if response_json.get('error'):
+        return top3
     for each in response_json['response']['items']:
         if each['likes']['count'] > top3[0]['likes']:
             top3[2]['id'] = top3[1]['id']
@@ -264,10 +304,25 @@ def what_are_user_avatars(client_id):
             top3[2]['id'] = each['id']
             top3[2]['likes'] = each['likes']['count']
             top3[2]['url'] = each['sizes'][0]['url']
-    pprint(top3)
+    # pprint(top3)
     return top3
 
 
-TOKEN = '79a2ff5d2be66ee861ae5ca60e5acb1a07611ea901d85204368694a4228ac9468db7bf8699f67fb6b9a30'
+def what_are_the_top_user_avatar(top):
+    """
+    Передаем словарь пользователей, по ним ищем фото, дописываем и возвращаем
+    :return:
+    """
+    i = 0
+    for each in top.values():
+        top3 = what_are_user_avatars(each['userid'])
+        each.update({'top3': {top3[0]['url'],top3[1]['url'],top3[2]['url']}})
+        i = i+1
+        if i == 10:
+            return top
+    return top
+
+
+TOKEN = 'db1a23b4b2c604e64fc7e3365574c7652b9e93e325b541c39086530944d6e27040b9eaf9ac6152bd38ea3'
 url_for_token = 'https://oauth.vk.com/authorize?client_id=7401636&response_type=token&v=5.103'
 
