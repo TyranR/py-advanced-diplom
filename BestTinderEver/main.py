@@ -46,7 +46,6 @@ def main():
     # Передаем список c найденными партнерами, ищем у них аватары, дописываем в пользователей и
     # первые 10 штук возврашаем
     top10_with_photo = what_are_the_top_user_avatar(match_people)
-    pprint(top10_with_photo)
     print("\nЭтап 5. Записываем полученных пользователей в базу данных.")
     json_finish = write_data(top10_with_photo)  # записываем базу получаем финальный JSON
     pprint(json_finish)

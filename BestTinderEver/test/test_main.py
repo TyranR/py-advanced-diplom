@@ -8,15 +8,22 @@ from BestTinderEver.VKWorker.vkapp import *
 
 class TestVK(unittest.TestCase):
 
-    @patch('main.input', 5563153)
-    def test_who_is(self):
+    def test_who_is_right(self):
         """
-        Проверка на верного пользователя
+        Проверка функции
         :return:
         """
-        original_client = who_is()
-        self.assertEqual(original_client, int())
+        with patch('builtins.input', return_value='171691064'):
+            assert who_is() == 171691064
 
+
+    def test_if_user_id_is_not_int(self):
+        """
+        Проверка функции
+        :return:
+        """
+        with patch('builtins.input', return_value='eshmargunov'):
+            assert who_is() == 171691064
 
 
 if __name__ == '__main__':
