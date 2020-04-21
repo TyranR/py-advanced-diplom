@@ -151,9 +151,11 @@ def what_are_original_user_detail(client_id):
     try:
         pprint(response_json['response'][0]['interests'])
         interests = response_json['response'][0]['interests']
+        interests_format = interests.split(sep=',')
     except:
         print('Интересов нет. Надо их задать')
         interests = input('Задай интересы для поиска: ')
+        interests_format = interests.split(sep=',')
     try:
         pprint(response_json['response'][0]['relation'])
         relation = response_json['response'][0]['relation']
@@ -163,9 +165,9 @@ def what_are_original_user_detail(client_id):
     usergroups = what_are_user_groups(client_id)
     print(f'\nГруппы будем искать такие : {usergroups}')
     final_choose = {'gender': gender, 'place': place , 'age_start': age_start, 'age_finish': age_finish, \
-                   'usergroups': usergroups, 'interests': interests, 'relation': relation}
+                   'usergroups': usergroups, 'interests': interests_format, 'relation': relation}
     # final_choose = [('gender', gender), ('place', place), ('age_start', age_start), ('age_finish', age_finish), \
-    #                 ('usergroups', usergroups), ('interests', interests), ('relation', relation)]
+    #                 ('usergroups', usergroups), ('interests', interests_format), ('relation', relation)]
     return final_choose
 
 
@@ -213,18 +215,18 @@ def what_are_user_detail(client_id):
     try:
         pprint(response_json['response'][0]['interests'])
         interests = response_json['response'][0]['interests']
+        interests_format = interests.split(sep=',')
     except:
-        interests = ""
+        interests_format = []
     try:
         pprint(response_json['response'][0]['relation'])
         relation = response_json['response'][0]['relation']
     except:
         relation = 0
     usergroups = what_are_user_groups(client_id)
-    #usergroups = ''
     url_user = 'https://vk.com/id'+str(client_id)
     client_data = {'userid': client_id, 'gender': gender, 'place': place , 'age_born': age_born, \
-                   'usergroups': usergroups, 'interests': interests, 'relation': relation, \
+                   'usergroups': usergroups, 'interests': interests_format, 'relation': relation, \
                    'url': url_user}
     pprint(client_data)
     return client_data
@@ -239,22 +241,16 @@ def search_partner_dic(source_data, all_users_profiles):
     """
     # pprint(source_data)
     match_users = {}
-    count = 1
+    count = 0
     for each in all_users_profiles.values():
         # Для точного поиска - используем полную версию требований
         # if (each['gender'] == source_data['gender'] and each['place'] == source_data['place'] and \
         #         each['age_born'] >= source_data['age_start'] and each['age_born'] <= source_data['age_start']):
         print(".", end="")
-        if each['gender'] == source_data['gender']: # для того чтобы долго не ждать, а только проверить программы
+        if each['gender'] == source_data['gender']:  # для того чтобы долго не ждать, а только проверить программу
             count = count + 1
             match_users.update({each['userid']: each})
 
-            #
-            #
-            # client_data = {'userid': client_id, 'gender': gender, 'place': place, 'age_born': age_born, \
-            #                'usergroups': usergroups, 'interests': interests, 'relation': relation, \
-            #                'url': url_user}
-    # pprint(match_users)
     print(f"\nСовпадений нашлось: {count}")
     return match_users
 
@@ -323,6 +319,6 @@ def what_are_the_top_user_avatar(top):
     return top
 
 
-TOKEN = 'db1a23b4b2c604e64fc7e3365574c7652b9e93e325b541c39086530944d6e27040b9eaf9ac6152bd38ea3'
+TOKEN = '40fd32ae1f5174098f69f0b910572e730386025ba7aa70a1984064eb091c1a37c07829c79f8a7fdc4610e'
 url_for_token = 'https://oauth.vk.com/authorize?client_id=7401636&response_type=token&v=5.103'
 

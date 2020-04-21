@@ -35,7 +35,7 @@ def main():
     print("\nЭтап 2. Начнем искать пользователей и получать данные из профиля.")
     # Наполним базу данными по порядку из вк
     all_users_profiles = {}
-    for i in range(1000,1020):
+    for i in range(20,100):
         client_data = what_are_user_detail(i)
         if client_data:
             all_users_profiles.update({i: client_data}) # добавляем в словарь пользователя (если он существует)
@@ -48,10 +48,8 @@ def main():
     top10_with_photo = what_are_the_top_user_avatar(match_people)
     pprint(top10_with_photo)
     print("\nЭтап 5. Записываем полученных пользователей в базу данных.")
-
-    # read_all()
-    # write_data(client_data) #записываем сразу в базу
-    # дубликаты надо пропускать
+    json_finish = write_data(top10_with_photo)  # записываем базу получаем финальный JSON
+    pprint(json_finish)
 
 
 if __name__ == '__main__':
